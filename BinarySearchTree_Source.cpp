@@ -1,5 +1,9 @@
+//Author:Akshara P K
+//Date: 06-Nov-2020
+
 #include<iostream>
-#include<queue>
+#include<stack>
+#include<vector>
 
 using namespace std;
 
@@ -30,23 +34,121 @@ public:
 	BSTreeNode* minimumKey(BSTreeNode*);
 	BSTreeNode* maximumKey(BSTreeNode*);
 	bool isValidBST(BSTreeNode*);
+	vector<int> inorderIterative(BSTreeNode*);
+	vector<int> preorderIterative(BSTreeNode*);
+	vector<int> postorderIterative(BSTreeNode*);
 };
+
+//Function to perform inorder traversal iteratively
+vector<int> BSTOperations::inorderIterative(BSTreeNode* bstreeRoot)
+{
+	std::stack< BSTreeNode*> stackNodes;
+	vector<int> vecNodes;
+	BSTreeNode* current = bstreeRoot;
+
+	//If current pointer is null and stack is empty, lets return
+	while ((current != nullptr) || (!stackNodes.empty()))
+	{
+		if (current != nullptr)
+		{
+			stackNodes.push(current);
+			current = current->leftBSTree;
+		}
+		else
+		{
+			current = stackNodes.top();
+			stackNodes.pop();
+			vecNodes.push_back(current->data);
+			current = current->rightBSTree;
+		}
+	}
+	return(vecNodes);
+}
+
+//Function to perform preorder traversal iteratively
+vector<int> BSTOperations::preorderIterative(BSTreeNode* bstreeRoot)
+{
+	std::stack< BSTreeNode*> stackNodes;
+	vector<int> vecNodes;
+	BSTreeNode* current = bstreeRoot;
+
+	//If current pointer is null and stack is empty, lets return
+	while ((current != nullptr) || (!stackNodes.empty()))
+	{
+		if (current != nullptr)
+		{
+			stackNodes.push(current);
+			vecNodes.push_back(current->data);
+			current = current->leftBSTree;
+		}
+		else
+		{
+			current = stackNodes.top();
+			stackNodes.pop();
+			current = current->rightBSTree;
+		}
+	}
+	return(vecNodes);
+}
+
+//Function to perform postorder traversal iteratively
+vector<int> BSTOperations::postorderIterative(BSTreeNode* bstreeRoot)
+{
+	std::stack< BSTreeNode*> stackNodes;
+	stackNodes.push(bstreeRoot);
+
+	std::stack< BSTreeNode*> stackOut;
+	vector<int> vecNodes;
+	BSTreeNode* current = bstreeRoot;
+
+	//If current pointer is null and stack is empty, lets return
+	while (!stackNodes.empty())
+	{
+		current = stackNodes.top();
+		stackOut.push(current);
+		stackNodes.pop();
+
+		if (current->leftBSTree != nullptr)
+		{
+			stackNodes.push(current->leftBSTree);
+		}
+		if (current->rightBSTree != nullptr)
+		{
+			stackNodes.push(current->rightBSTree);
+		}
+	}
+
+	while (!stackOut.empty())
+	{
+		vecNodes.push_back(stackOut.top()->data);
+		stackOut.pop();
+	}
+	return(vecNodes);
+}
 
 //Function to check whether a tree is valid BST
 bool BSTOperations::isValidBST(BSTreeNode* bstreeRoot)
 {
-	if (bstreeRoot == nullptr)
+	std::stack< BSTreeNode*> stackNodes;
+	vector<int> vecNodes;
+
+	if ((bstreeRoot == nullptr) || (bstreeRoot->leftBSTree == nullptr && bstreeRoot->rightBSTree == nullptr))
 	{
 		return true;
 	}
-	queue< BSTreeNode*> qBST;
-	qBST.push(bstreeRoot);
-	while (!qBST.empty())
-	{
-		BSTreeNode *temp = qBST.front();
-		qBST.pop();
+	vecNodes = inorderIterative(bstreeRoot);
 
+	int temp = vecNodes[0];
+	for (int i =1; i < vecNodes.size(); i++)
+	{
+		if (temp >= vecNodes[i])
+		{
+			return false;
+		}
+		temp = vecNodes[i];
 	}
+
+	return(true);
 }
 
 //Function to create Binary Search Tree Node
@@ -268,9 +370,24 @@ void main()
 	bstreeRoot = BSTreeNew.insertNodeNonRecursive(bstreeRoot, 7);
 	bstreeRoot = BSTreeNew.insertNodeNonRecursive(bstreeRoot, 12);
 	bstreeRoot = BSTreeNew.insertNodeNonRecursive(bstreeRoot, 25);
-	BSTreeNew.InOrder(bstreeRoot);
+	bstreeRoot = BSTreeNew.insertNodeNonRecursive(bstreeRoot, 35);
+
+	vector<int> vecNodes = BSTreeNew.postorderIterative(bstreeRoot);
+	// Declaring iterator to the vector 
+	vector<int>::iterator nodesPtr;
+
+	// Displaying vector elements using begin() and end() 
+	cout << "Post-Order Nodes : ";
+	for (nodesPtr = vecNodes.begin(); nodesPtr < vecNodes.end(); nodesPtr++)
+	{
+		cout << *(nodesPtr) << " ";
+	}
+	
 	BSTreeNew.deleteNode(bstreeRoot, 10);
-	cout << "\n";
+	cout << "\nAfter Deletion: ";
 	BSTreeNew.InOrder(bstreeRoot);
+
+	cout << "\n Valid: " << BSTreeNew.isValidBST(bstreeRoot);
+
 	getchar();
 }
