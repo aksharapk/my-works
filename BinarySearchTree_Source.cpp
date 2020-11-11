@@ -4,6 +4,7 @@
 #include<iostream>
 #include<stack>
 #include<vector>
+#include<queue>
 
 using namespace std;
 
@@ -37,6 +38,7 @@ public:
 	vector<int> inorderIterative(BSTreeNode*);
 	vector<int> preorderIterative(BSTreeNode*);
 	vector<int> postorderIterative(BSTreeNode*);
+	vector<vector< BSTreeNode*>> levelOrderIterative(BSTreeNode*);
 };
 
 //Function to perform inorder traversal iteratively
@@ -329,11 +331,11 @@ BSTreeNode* BSTOperations::deleteNode(BSTreeNode* root, int d)
 		//int valPre = predecessor->data;
 
 		//Two ways: 2) or replace with in-order successor
-		//find in-order predecessor
+		//find in-order successor
 		BSTreeNode* successor = minimumKey(current->rightBSTree);
 		int valPre = successor->data;
 
-		//delete predecessor node iteratively which may have atmost one right child
+		//delete successor node iteratively which may have atmost one right child
 		root = deleteNode(root, successor->data);
 		current->data = valPre;
 	}
@@ -358,6 +360,56 @@ BSTreeNode* BSTOperations::deleteNode(BSTreeNode* root, int d)
 		}
 	}
 	return(root);
+}
+
+//Function to return all nodes in each level as a collection of vectors
+vector<vector< BSTreeNode*>> levelOrderIterative(BSTreeNode* root)
+{
+	vector<vector< BSTreeNode*>> vecAllLevels;
+	if(root == nullptr)
+	{
+		return vecAllLevels;
+	}
+
+	BSTreeNode* current;
+	queue< BSTreeNode*> queueNodes;
+	//Insert root in to queue
+	queueNodes.push(root);
+	
+	int count = 1;
+	vector< BSTreeNode*> levelNodes;
+	while (!queueNodes.empty() && count != 0)
+	{
+		//CountTemp is to count nodes in each level
+		int countTemp = 0;
+		while (count)
+		{
+			current = queueNodes.front();
+			levelNodes.push_back(current);
+			queueNodes.pop();
+			count--;
+			if (count == 0) //means levelNodes has all nodes inserted in the particular level
+			{
+				vecAllLevels.push_back(levelNodes);
+				levelNodes.clear();
+			}
+			//if current has left sub tree, push that one to queue
+			if (current->leftBSTree != nullptr)
+			{
+				queueNodes.push(current->leftBSTree);
+				countTemp++;
+			}
+			//if current has right sub tree, push that one to queue
+			if (current->rightBSTree != nullptr)
+			{
+				queueNodes.push(current->rightBSTree);
+				countTemp++;
+			}
+		}
+		//copy count of nodes to count for the other loop
+		count = countTemp;
+	}
+	return vecAllLevels;
 }
 
 void main()
@@ -388,6 +440,19 @@ void main()
 	BSTreeNew.InOrder(bstreeRoot);
 
 	cout << "\n Valid: " << BSTreeNew.isValidBST(bstreeRoot);
+
+	vector<vector< BSTreeNode*>> vecAllLevels = levelOrderIterative(bstreeRoot);
+	vector<vector< BSTreeNode*>>::iterator levelNodesIterator;
+	vector< BSTreeNode*>::iterator nodesIterator;
+	for (levelNodesIterator = vecAllLevels.begin(); levelNodesIterator < vecAllLevels.end(); levelNodesIterator++)
+	{
+		cout << "\n[";
+		for (nodesIterator = (*levelNodesIterator).begin(); nodesIterator < (*levelNodesIterator).end(); nodesIterator++)
+		{
+			cout << (*nodesIterator)->data << ",";
+		}
+		cout << "]";
+	}
 
 	getchar();
 }
